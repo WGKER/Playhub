@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { RefreshRight } from '@element-plus/icons-vue'
-import SmartPlayer from '@/components/SmartPlayer.vue'
+import PlyrPlayer from '@/components/PlyrPlayer.vue'
 import { useTvboxStore } from '@/stores/tvbox'
 
 const store = useTvboxStore()
@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="live-player-shell">
-          <SmartPlayer
+          <PlyrPlayer
             v-if="currentSource?.url"
             :url="currentSource.url"
             :poster="currentSource.logo || currentChannel?.logo"

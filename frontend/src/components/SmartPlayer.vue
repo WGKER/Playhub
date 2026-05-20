@@ -16,9 +16,13 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  initialTime: {
+    type: Number,
+    default: 0,
+  },
 })
 
-const emit = defineEmits(['error', 'ready', 'playable'])
+const emit = defineEmits(['error', 'ready', 'playable', 'timeupdate'])
 
 const containerRef = ref(null)
 const loading = ref(false)
@@ -30,6 +34,8 @@ let hls = null
 let readyTimer = null
 let removeVideoEvents = null
 let playableEmitted = false
+let seekDone = false
+let lastTimeupdate = 0
 
 function clearReadyTimer() {
   if (readyTimer) {
@@ -104,6 +110,24 @@ function handleFatalError() {
   emit('error')
 }
 
+let seekTimer = null
+
+function doInitialSeek() {
+  if (seekDone || props.initialTime <= 0 || !art) {
+    return
+  }
+  seekDone = true
+  if (seekTimer) {
+    window.clearTimeout(seekTimer)
+  }
+  // Small delay to let player engine settle, then seek
+  seekTimer = window.setTimeout(() => {
+    if (art && art.video) {
+      art.seek(props.initialTime)
+    }
+  }, 400)
+}
+
 function bindVideoEvents(video) {
   const listeners = [
     ['loadstart', () => setLoadingState(true, 8, '正在连接视频流…')],
@@ -115,9 +139,20 @@ function bindVideoEvents(video) {
       () => {
         setLoadingState(true, Math.max(loadingPercent.value, 84), '即将开始播放…')
         emitPlayable()
+        doInitialSeek()
       },
     ],
     ['playing', () => finishLoading()],
+    [
+      'timeupdate',
+      () => {
+        const now = Date.now()
+        if (now - lastTimeupdate > 5000 && video.currentTime > 0) {
+          lastTimeupdate = now
+          emit('timeupdate', Math.round(video.currentTime))
+        }
+      },
+    ],
     ['error', () => handleFatalError()],
   ]
 
@@ -129,6 +164,10 @@ function bindVideoEvents(video) {
 
 function destroyPlayer() {
   clearReadyTimer()
+  if (seekTimer) {
+    window.clearTimeout(seekTimer)
+    seekTimer = null
+  }
   detachVideoEvents()
   destroyHls()
   if (art) {
@@ -154,6 +193,7 @@ function buildHlsPlayer(video, url) {
       if (props.autoplay) {
         video.play().catch(() => {})
       }
+      doInitialSeek()
     })
     hls.on(Hls.Events.LEVEL_LOADED, () => {
       loadingPercent.value = Math.max(loadingPercent.value, 46)
@@ -190,6 +230,8 @@ function buildPlayer() {
   }
 
   playableEmitted = false
+  seekDone = false
+  lastTimeupdate = 0
   setLoadingState(true, 4, '正在初始化播放器…')
 
   const isHls = /\.m3u8(\?|$)/i.test(props.url)
@@ -230,6 +272,10 @@ function buildPlayer() {
   art.on('ready', () => {
     loadingPercent.value = Math.max(loadingPercent.value, 18)
     emit('ready')
+    doInitialSeek()
+  })
+  art.on('video:playing', () => {
+    doInitialSeek()
   })
   art.on('video:error', () => {
     handleFatalError()

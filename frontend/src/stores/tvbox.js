@@ -444,7 +444,7 @@ export const useTvboxStore = defineStore('tvbox', () => {
     )
   }
 
-  function upsertHistory(detail, flagName, episodeIndex, episode, playUrl) {
+  function upsertHistory(detail, flagName, episodeIndex, episode, playUrl, currentTime = 0) {
     const entry = {
       sourceUid: detail.sourceUid,
       sourceName: detail.sourceName,
@@ -456,6 +456,7 @@ export const useTvboxStore = defineStore('tvbox', () => {
       episodeId: episode.id,
       episodeName: episode.name,
       playUrl,
+      currentTime: Number.isFinite(currentTime) ? Math.max(0, Math.round(currentTime)) : 0,
       updatedAt: Date.now(),
     }
 
@@ -478,6 +479,16 @@ export const useTvboxStore = defineStore('tvbox', () => {
     }
 
     persistHistory()
+  }
+
+  function updateHistoryTime(sourceUid, vodId, currentTime) {
+    const entry = history.value.find(
+      (item) => item.sourceUid === sourceUid && String(item.vodId) === String(vodId),
+    )
+    if (entry) {
+      entry.currentTime = Number.isFinite(currentTime) ? Math.max(0, Math.round(currentTime)) : 0
+      persistHistory()
+    }
   }
 
   function clearCurrentDetail() {
@@ -838,7 +849,7 @@ export const useTvboxStore = defineStore('tvbox', () => {
 
       const items = normalizeList(payload).map((item) => normalizeVideoCard(item, source))
       if (items.length) {
-        prependUniqueWallVideos(items)
+        appendUniqueWallVideos(items)
         searchProgress.matchedSources += 1
       }
     } catch (error) {
@@ -1133,7 +1144,7 @@ export const useTvboxStore = defineStore('tvbox', () => {
   }
 
   function updateAppTheme(theme) {
-    appTheme.value = theme === 'naifei' ? 'naifei' : 'default'
+    appTheme.value = theme === 'naifei' ? 'naifei' : theme === 'aurora' ? 'aurora' : 'default'
     persistSettings()
   }
 
@@ -1206,6 +1217,7 @@ export const useTvboxStore = defineStore('tvbox', () => {
     selectNextLiveSource,
     clearHistory,
     getHistoryEntry,
+    updateHistoryTime,
     resolveEpisode,
     goToWallPage,
     loadMoreWall,

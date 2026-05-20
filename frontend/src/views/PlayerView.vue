@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Connection, RefreshRight, Sort } from '@element-plus/icons-vue'
-import SmartPlayer from '@/components/SmartPlayer.vue'
+import PlyrPlayer from '@/components/PlyrPlayer.vue'
 import { useTvboxStore } from '@/stores/tvbox'
 
 const route = useRoute()
@@ -11,6 +11,9 @@ const router = useRouter()
 const store = useTvboxStore()
 const playbackError = ref(false)
 const reversed = ref(false)
+const startTime = ref(0)
+const sourceUidRef = ref('')
+const vodIdRef = ref('')
 
 const detail = computed(() => store.currentPlayback?.detail || store.currentDetail)
 const currentPlayback = computed(() => store.currentPlayback)
@@ -39,15 +42,23 @@ async function loadPlayback() {
   const sourceUid = String(route.query.source || '')
   const vodId = String(route.query.vod || '')
   playbackError.value = false
+  sourceUidRef.value = sourceUid
+  vodIdRef.value = vodId
 
   if (!sourceUid || !vodId) {
     store.clearCurrentPlayback()
     return
   }
 
+  const hasDetail = store.currentDetail?.sourceUid === sourceUid && store.currentDetail?.id === vodId
+  const resumeEntry = store.getHistoryEntry(sourceUid, vodId)
+  startTime.value = route.query.resume === '1' && resumeEntry?.currentTime ? resumeEntry.currentTime : 0
+
   store.clearCurrentPlayback()
   try {
-    await store.ensureDetail(sourceUid, vodId, { force: true })
+    if (!hasDetail) {
+      await store.ensureDetail(sourceUid, vodId, { force: true })
+    }
     await store.playEpisode(sourceUid, vodId, route.query.flag, route.query.episode, {
       useStoredResume: route.query.resume === '1',
     })
@@ -89,6 +100,12 @@ function handlePlayerError() {
   })
 }
 
+function handleTimeupdate(currentTime) {
+  if (sourceUidRef.value && vodIdRef.value) {
+    store.updateHistoryTime(sourceUidRef.value, vodIdRef.value, currentTime)
+  }
+}
+
 function goBack() {
   const origin = store.playerOrigin
   if (origin?.name === 'history') {
@@ -123,10 +140,12 @@ watch(
     <template v-if="isNaifeiTheme">
       <div class="naifei-player-head">
         <div class="naifei-player-frame">
-          <SmartPlayer
+          <PlyrPlayer
             :url="currentPlayback.url"
             :poster="detail.pic"
+            :initial-time="startTime"
             @error="handlePlayerError"
+            @timeupdate="handleTimeupdate"
           />
         </div>
 
@@ -192,10 +211,12 @@ watch(
           </div>
 
           <div class="player-frame">
-            <SmartPlayer
+            <PlyrPlayer
               :url="currentPlayback.url"
               :poster="detail.pic"
+              :initial-time="startTime"
               @error="handlePlayerError"
+              @timeupdate="handleTimeupdate"
             />
           </div>
 

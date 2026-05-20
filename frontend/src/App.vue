@@ -30,6 +30,7 @@ const currentLiveSourceHost = computed(() => parseHost(draftLiveSourceUrl.value 
 const currentLiveEpgHost = computed(() => parseHost(draftLiveEpgUrl.value || store.liveEpgUrl))
 const appFrameClass = computed(() => ({
   'app-frame--naifei': store.appTheme === 'naifei',
+  'app-frame--aurora': store.appTheme === 'aurora',
 }))
 
 function parseHost(raw) {
@@ -57,7 +58,7 @@ function openSettings() {
 
 function applyTheme(theme) {
   if (typeof document !== 'undefined') {
-    document.documentElement.dataset.theme = theme === 'naifei' ? 'naifei' : 'default'
+    document.documentElement.dataset.theme = theme === 'naifei' ? 'naifei' : theme === 'aurora' ? 'aurora' : 'default'
   }
 }
 
@@ -331,7 +332,7 @@ onMounted(async () => {
             <h4>选择前端显示风格</h4>
           </div>
           <span class="settings-mini-chip">
-            {{ store.appTheme === 'naifei' ? '经典' : '默认' }}
+            {{ store.appTheme === 'naifei' ? '经典' : store.appTheme === 'aurora' ? '极光' : '默认' }}
           </span>
         </div>
 
@@ -342,6 +343,7 @@ onMounted(async () => {
         >
           <el-radio-button :value="'default'">默认</el-radio-button>
           <el-radio-button :value="'naifei'">经典</el-radio-button>
+          <el-radio-button :value="'aurora'">极光</el-radio-button>
         </el-radio-group>
       </section>
 

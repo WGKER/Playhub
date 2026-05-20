@@ -10,6 +10,21 @@ const store = useTvboxStore()
 
 const isNaifeiTheme = computed(() => store.appTheme === 'naifei')
 
+function formatTimeLabel(item) {
+  const parts = [item.episodeName]
+  if (item.currentTime > 0) {
+    const h = Math.floor(item.currentTime / 3600)
+    const m = Math.floor((item.currentTime % 3600) / 60)
+    const s = item.currentTime % 60
+    if (h > 0) {
+      parts.push(`${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`)
+    } else {
+      parts.push(`${m}:${String(s).padStart(2, '0')}`)
+    }
+  }
+  return parts.join(' · ')
+}
+
 const wallVideos = computed(() =>
   store.history.map((item) => ({
     id: item.vodId,
@@ -17,7 +32,7 @@ const wallVideos = computed(() =>
     pic: item.vodPic,
     sourceUid: item.sourceUid,
     sourceName: item.sourceName,
-    remarks: item.episodeName,
+    remarks: formatTimeLabel(item),
   })),
 )
 
