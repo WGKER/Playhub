@@ -8,14 +8,19 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-/target/
 .DS_Store
 dist
 dist-ssr
 coverage
 *.local
 .cache
-/target/*
+
+# 忽略 libs 下所有内容
+target/**
+# 但是保留目录本身（否则下面的 ! 不生效）
+!target/
+# 不忽略你要的 jar
+!target/tvbox-webapp-*.jar
 
 # Editor directories and files
 .vscode/*
