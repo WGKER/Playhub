@@ -32,7 +32,7 @@ jobs:
           platforms: linux/arm64  # 仅构建arm64，amd64已注释
           push: false            # 关键：不推送镜像
           tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}  # 自动匹配
-          outputs: type=docker,dest=/tmp/playhub-arm64.tar  # 导出为本地文件
+          outputs: type=docker,dest=/tmp/${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}.tar  # 导出为本地文件
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -41,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name:  ${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}.tar
-          path: /tmp/playhub-arm64.tar
+          path: /tmp/${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}.tar
