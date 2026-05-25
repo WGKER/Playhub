@@ -40,5 +40,5 @@ jobs:
       - name: Upload image artifact
         uses: actions/upload-artifact@v4
         with:
-          name:  ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}.tar
+          name:  ${{ env.IMAGE_NAME }}-${{ env.IMAGE_TAG }}.tar
           path: /tmp/playhub-arm64.tar
