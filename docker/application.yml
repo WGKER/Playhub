@@ -1,0 +1,31 @@
+server:
+  port: ${APP_PORT:18080}
+  tomcat:
+    threads:
+      max: ${SERVER_TOMCAT_MAX_THREADS:24}
+      min-spare: ${SERVER_TOMCAT_MIN_SPARE_THREADS:2}
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:12}
+
+spring:
+  jackson:
+    serialization:
+      indent-output: true
+
+logging:
+  file:
+    name: ${APP_LOG_FILE:/opt/playhub/logs/tvbox-webapp.log}
+
+app:
+  cache-dir: ${APP_CACHE_DIR:/opt/playhub/data/cache}
+  spider-bridge-url: ${SPIDER_BRIDGE_URL:}
+  node-command: ${NODE_COMMAND:node}
+  python-command: ${PYTHON_COMMAND:python3}
+  script-timeout-seconds: ${APP_SCRIPT_TIMEOUT_SECONDS:90}
+  spider-operation-timeout-seconds: ${APP_SPIDER_OPERATION_TIMEOUT_SECONDS:25}
+  spider-operation-max-concurrency: ${APP_SPIDER_OPERATION_MAX_CONCURRENCY:2}
+  spider-operation-queue-capacity: ${APP_SPIDER_OPERATION_QUEUE_CAPACITY:4}
+  spider-cache-max-classloaders: ${APP_SPIDER_CACHE_MAX_CLASSLOADERS:8}
+  spider-cache-max-spiders: ${APP_SPIDER_CACHE_MAX_SPIDERS:32}
+  script-max-concurrency: ${APP_SCRIPT_MAX_CONCURRENCY:2}
+  script-admission-timeout-seconds: ${APP_SCRIPT_ADMISSION_TIMEOUT_SECONDS:3}
+  dex2jar-command: ${DEX2JAR_COMMAND:__AUTO__}

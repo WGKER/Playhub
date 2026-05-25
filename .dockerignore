@@ -1,0 +1,30 @@
+*
+
+# Keep Dockerfile
+!Dockerfile
+!.dockerignore
+
+# Keep docker config
+!docker/
+docker/*
+!docker/application.yml
+
+# Keep dex2jar tools
+!tools/
+tools/*
+!tools/dex-tools-v2.4/
+!tools/dex-tools-v2.4/**
+
+# Keep built JAR
+!target/
+target/*
+!target/tvbox-webapp-*.jar
+
+# Keep scripts (JS/Python spider runtimes)
+!scripts/
+!scripts/**
+scripts/**/__pycache__/
+scripts/**/*.pyc
+
+# Keep start.sh
+!start.sh
